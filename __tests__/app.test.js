@@ -10,21 +10,14 @@ afterAll(() => {
 })
 
 describe(' GET /api/topics', () => {
-    it('GET: 200 responds with an array of all topic objects', () => {
+    it('GET: 200 responds with an array of all topic objects,  each one should have slug and description properties', () => {
         return request(app)
             .get("/api/topics")
             .expect(200)
             .then(({ body }) => {
                 const { topics } = body;
                 expect(topics).toHaveLength(3);
-            })
-    });
-    it('GET 200 responds with an array of topic objects, each one should have slug and description properties', () => {
-        return request(app)
-            .get('/api/topics')
-            .expect(200)
-            .then(({ body }) => {
-                const { topics } = body;
+                expect(topics).toBeInstanceOf(Array);
                 topics.forEach((topic) => {
                     expect(topic).toMatchObject({
                         slug: expect.any(String),

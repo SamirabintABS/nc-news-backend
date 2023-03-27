@@ -9,4 +9,10 @@ app.all("*", (req, res, next) => {
     res.status(404).send({ msg: 'Path not found' })
 })
 
+app.use((err, req, res, next) => {
+    if (err.status === 500) {
+        res.status(500).send({ msg: 'Server Error!' });
+    }
+});
+
 module.exports = app;
