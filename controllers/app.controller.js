@@ -6,7 +6,7 @@ exports.getTopics = (req, res, next) => {
         .catch(next);
 }
 
-exports.getArticles = (req, res, next) => {
+exports.getArticlesById = (req, res, next) => {
     const articleId = req.params;
     const articleIdValue = articleId.article_id;
 
@@ -18,3 +18,5 @@ exports.getArticles = (req, res, next) => {
             next(err);
         })
 }
+
+exports.get
