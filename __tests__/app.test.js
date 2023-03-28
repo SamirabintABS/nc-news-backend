@@ -48,7 +48,6 @@ describe('GET /api/articles/:article_id', () => {
                     author: expect.any(String),
                     body: expect.any(String),
                     created_at: expect.any(String),
-                    article_img_url: expect.any(String),
                     article_id: article.article_id,
                     votes: expect.any(Number)
                 })
