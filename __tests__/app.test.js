@@ -29,7 +29,7 @@ describe(' GET /api/topics', () => {
             .get('/api/toppics')
             .expect(404)
             .then(({ body }) => {
-                expect(body.msg).toBe('Path not found - this article does not exist');
+                expect(body.msg).toBe('Path not found');
             })
     });
 });
@@ -49,7 +49,7 @@ describe('GET /api/articles/:article_id', () => {
                     body: expect.any(String),
                     created_at: expect.any(String),
                     article_img_url: expect.any(String),
-                    article_id: expect.any(Number),
+                    article_id: article.article_id,
                     votes: expect.any(Number)
                 })
             })
@@ -59,7 +59,7 @@ describe('GET /api/articles/:article_id', () => {
             .get("/api/articles/99999")
             .expect(404)
             .then(({ body }) => {
-                expect(body.msg).toBe("Path not found - this article does not exist")
+                expect(body.msg).toBe("Article not found")
             })
     });
     it('GET 400: responds with an error to show that the ID is invalid', () => {
