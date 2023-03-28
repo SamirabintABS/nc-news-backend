@@ -5,9 +5,7 @@ const seed = require('../db/seeds/seed.js');
 const testData = require('../db/data/test-data/index.js')
 
 beforeEach(() => seed(testData));
-afterAll(() => {
-    return db.end();
-})
+afterAll(() => db.end());
 
 describe(' GET /api/topics', () => {
     it('GET: 200 responds with an array of all topic objects,  each one should have slug and description properties', () => {
@@ -32,6 +30,43 @@ describe(' GET /api/topics', () => {
             .expect(404)
             .then(({ body }) => {
                 expect(body.msg).toBe('Path not found');
+            })
+    });
+});
+
+describe('GET /api/articles/:article_id', () => {
+    it('GET: 200 responds with an article object which includes the relevant properties', () => {
+        return request(app)
+            .get("/api/articles/3")
+            .expect(200)
+            .then(({ body }) => {
+                const { article } = body;
+                expect(article).toBeInstanceOf(Object)
+                expect(article).toMatchObject({
+                    title: expect.any(String),
+                    topic: expect.any(String),
+                    author: expect.any(String),
+                    body: expect.any(String),
+                    created_at: expect.any(String),
+                    article_id: article.article_id,
+                    votes: expect.any(Number)
+                })
+            })
+    });
+    it('GET 404 responds with an error to show that the Id does not exist and is not found', () => {
+        return request(app)
+            .get("/api/articles/99999")
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Article not found")
+            })
+    });
+    it('GET 400: responds with an error to show that the ID is invalid', () => {
+        return request(app)
+            .get("/api/articles/notAnId")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Invalid ID")
             })
     });
 });
