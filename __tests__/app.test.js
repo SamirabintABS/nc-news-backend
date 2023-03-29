@@ -71,7 +71,7 @@ describe('GET /api/articles/:article_id', () => {
     });
 });
 
-describe.only('GET: /api/articles', () => {
+describe('GET: /api/articles', () => {
     it('GET: responds with an array of objects, each object has the relevant properties including a comment_count of all the comments with the its article_id, sorted by date in descending order', () => {
         return request(app)
             .get('/api/articles')
