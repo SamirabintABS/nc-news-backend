@@ -70,3 +70,38 @@ describe('GET /api/articles/:article_id', () => {
             })
     });
 });
+
+describe('GET: /api/articles', () => {
+    it('GET: responds with an array of objects, each object has the relevant properties including a comment_count of all the comments with the its article_id, sorted by date in descending order', () => {
+        return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body).toHaveLength(12);
+                expect(body).toBeInstanceOf(Array)
+                body.forEach((article) => {
+                    expect(article).toMatchObject({
+                        author: expect.any(String),
+                        title: expect.any(String),
+                        article_id: expect.any(Number),
+                        topic: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: expect.any(Number),
+                        article_img_url: expect.any(String),
+                        comment_count: expect.any(Number)
+                    })
+                })
+                expect(body).toBeSortedBy('created_at', {
+                    descending: true,
+                })
+            })
+    });
+    it('GET 404: Responds with an error when given path has a typo', () => {
+        return request(app)
+            .get('/api/articccles')
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe('Path not found')
+            })
+    });
+});
