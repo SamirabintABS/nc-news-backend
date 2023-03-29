@@ -105,3 +105,46 @@ describe('GET: /api/articles', () => {
             })
     });
 });
+
+describe('GET /api/articles/:article_id/comments', () => {
+    it('GET 200: responds with an array of comment objects for the given article_id with the relevant properties, sorted by the most recent comments first', () => {
+        return request(app)
+            .get('/api/articles/1/comments')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body).toHaveLength(11);
+                expect(body).toBeInstanceOf(Array)
+                body.forEach((comment) => {
+                    expect(comment).toMatchObject({
+                        article_id: expect.any(Number),
+                        comment_id: expect.any(Number),
+                        body: expect.any(String),
+                        author: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: expect.any(Number),
+                    })
+                })
+                expect(body).toBeSortedBy('created_at', {
+                    descending: true,
+                })
+            });
+    })
+    it('GET 404: Responds with an error if the article id is valid but does not exist yet', () => {
+        return request(app)
+            .get("/api/articles/99999/comments")
+            .expect(404)
+            .then((body) => {
+                const errorObject = JSON.parse(body.text);
+                expect(errorObject.msg).toBe("Article not found")
+            })
+    });
+    it('GET 400: responds with an error to show that the ID is invalid', () => {
+        return request(app)
+            .get("/api/articles/notAnId/comments")
+            .expect(400)
+            .then((body) => {
+                const errorObject = JSON.parse(body.text);
+                expect(errorObject.msg).toBe("Invalid ID")
+            })
+    });
+});
