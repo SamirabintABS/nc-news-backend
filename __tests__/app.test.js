@@ -133,18 +133,16 @@ describe('GET /api/articles/:article_id/comments', () => {
         return request(app)
             .get("/api/articles/99999/comments")
             .expect(404)
-            .then((body) => {
-                const errorObject = JSON.parse(body.text);
-                expect(errorObject.msg).toBe("Article not found")
+            .then(({ body }) => {
+                expect(body.msg).toBe("Article not found")
             })
     });
     it('GET 400: responds with an error to show that the ID is invalid', () => {
         return request(app)
             .get("/api/articles/notAnId/comments")
             .expect(400)
-            .then((body) => {
-                const errorObject = JSON.parse(body.text);
-                expect(errorObject.msg).toBe("Invalid ID")
+            .then(({ body }) => {
+                expect(body.msg).toBe("Invalid ID")
             })
     });
 });
