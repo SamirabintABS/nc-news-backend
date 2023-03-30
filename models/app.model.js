@@ -44,3 +44,18 @@ exports.fetchAllArticles = () => {
             return result.rows;
         })
 }
+
+exports.fetchCommentsById = (articleId) => {
+    const articlesQuery = `SELECT * FROM articles WHERE article_id = $1`;
+    const commentsQuery = `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`
+
+    return Promise.all([
+        db.query(articlesQuery, [articleId]),
+        db.query(commentsQuery, [articleId])
+    ]).then(([articleResult, commentsResult]) => {
+        if (articleResult.rows.length === 0) {
+            return Promise.reject({ status: 404, msg: "Article ID not found" })
+        }
+        return commentsResult.rows;
+    })
+}
