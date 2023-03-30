@@ -113,11 +113,9 @@ describe('GET /api/articles/:article_id/comments', () => {
             .expect(200)
             .then(({ body }) => {
                 const { comments } = body;
-                console.log(comments)
-                const { rows } = comments;
-                expect(rows).toHaveLength(11);
-                expect(rows).toBeInstanceOf(Array)
-                rows.forEach((comment) => {
+                expect(comments).toHaveLength(11);
+                expect(comments).toBeInstanceOf(Array)
+                comments.forEach((comment) => {
                     expect(comment).toMatchObject({
                         article_id: 1,
                         comment_id: expect.any(Number),
@@ -127,7 +125,7 @@ describe('GET /api/articles/:article_id/comments', () => {
                         votes: expect.any(Number),
                     })
                 })
-                expect(rows).toBeSortedBy('created_at', {
+                expect(comments).toBeSortedBy('created_at', {
                     descending: true,
                 })
             });
@@ -138,10 +136,9 @@ describe('GET /api/articles/:article_id/comments', () => {
             .expect(200)
             .then(({ body }) => {
                 const { comments } = body;
-                const { rows } = comments;
-                expect(rows).toHaveLength(0);
-                expect(rows).toBeInstanceOf(Array);
-                expect(rows).toEqual([]);
+                expect(comments).toHaveLength(0);
+                expect(comments).toBeInstanceOf(Array);
+                expect(comments).toEqual([]);
             })
     });
     it('GET 404: Responds with an error if the article id is valid but does not exist yet or if the article id exists but has not comments', () => {
@@ -149,7 +146,7 @@ describe('GET /api/articles/:article_id/comments', () => {
             .get("/api/articles/99999/comments")
             .expect(404)
             .then(({ body }) => {
-                expect(body.msg).toBe("No comments found")
+                expect(body.msg).toBe("Article ID not found")
             })
     });
     it('GET 400: responds with an error to show that the ID is invalid', () => {

@@ -54,8 +54,8 @@ exports.fetchCommentsById = (articleId) => {
         db.query(commentsQuery, [articleId])
     ]).then(([articleResult, commentsResult]) => {
         if (articleResult.rows.length === 0) {
-            return Promise.reject({ status: 404, msg: "No comments found" })
+            return Promise.reject({ status: 404, msg: "Article ID not found" })
         }
-        return commentsResult;
+        return commentsResult.rows;
     })
 }
