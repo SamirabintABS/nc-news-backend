@@ -112,11 +112,14 @@ describe('GET /api/articles/:article_id/comments', () => {
             .get('/api/articles/1/comments')
             .expect(200)
             .then(({ body }) => {
-                expect(body).toHaveLength(11);
-                expect(body).toBeInstanceOf(Array)
-                body.forEach((comment) => {
+                const { comments } = body;
+                console.log(comments)
+                const { rows } = comments;
+                expect(rows).toHaveLength(11);
+                expect(rows).toBeInstanceOf(Array)
+                rows.forEach((comment) => {
                     expect(comment).toMatchObject({
-                        article_id: expect.any(Number),
+                        article_id: 1,
                         comment_id: expect.any(Number),
                         body: expect.any(String),
                         author: expect.any(String),
@@ -124,17 +127,29 @@ describe('GET /api/articles/:article_id/comments', () => {
                         votes: expect.any(Number),
                     })
                 })
-                expect(body).toBeSortedBy('created_at', {
+                expect(rows).toBeSortedBy('created_at', {
                     descending: true,
                 })
             });
     })
-    it('GET 404: Responds with an error if the article id is valid but does not exist yet', () => {
+    it('GET 200: responds with an empty array if article exists but has no comments', () => {
+        return request(app)
+            .get('/api/articles/2/comments')
+            .expect(200)
+            .then(({ body }) => {
+                const { comments } = body;
+                const { rows } = comments;
+                expect(rows).toHaveLength(0);
+                expect(rows).toBeInstanceOf(Array);
+                expect(rows).toEqual([]);
+            })
+    });
+    it('GET 404: Responds with an error if the article id is valid but does not exist yet or if the article id exists but has not comments', () => {
         return request(app)
             .get("/api/articles/99999/comments")
             .expect(404)
             .then(({ body }) => {
-                expect(body.msg).toBe("Article not found")
+                expect(body.msg).toBe("No comments found")
             })
     });
     it('GET 400: responds with an error to show that the ID is invalid', () => {

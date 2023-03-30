@@ -32,7 +32,7 @@ exports.getCommentsById = (req, res, next) => {
     const articleIdValue = articleId.article_id;
     fetchCommentsById(articleIdValue)
         .then((comments) => {
-            res.status(200).send(comments)
+            res.status(200).send({ comments: comments })
         })
         .catch(next)
 }
