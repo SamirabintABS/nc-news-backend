@@ -59,3 +59,26 @@ exports.fetchCommentsById = (articleId) => {
         return commentsResult.rows;
     })
 }
+
+exports.insertComments = (newComment, articleId) => {
+    const psqlQueryArticle = `SELECT * FROM articles WHERE article_id = $1`;
+    const postCommentQuery = `INSERT INTO comments
+            (article_id, author, body)
+            VALUES($1, $2, $3)
+            RETURNING *;`
+
+    const id = articleId.article_id
+    const { username, body } = newComment;
+
+    return db
+        .query(psqlQueryArticle, [id])
+        .then((articleResult) => {
+            if (articleResult.rows.length === 0) {
+                return Promise.reject({ status: 404, msg: "Article ID not found" })
+            }
+
+            return db.query(postCommentQuery, [id, username, body]).then((commentResult) => {
+                return commentResult.rows[0]
+            })
+        })
+}
