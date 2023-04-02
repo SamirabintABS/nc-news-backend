@@ -4,7 +4,7 @@ const { handlePsqlErrors, handleServerErrors, handleCustomErrors } = require('./
 
 const app = express();
 
-// allows us to get the req.body
+// allows us to get the req.body for posting and patching
 app.use(express.json());
 
 app.get("/api/topics", getTopics);
