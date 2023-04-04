@@ -158,3 +158,161 @@ describe('GET /api/articles/:article_id/comments', () => {
             })
     });
 });
+
+describe('POST /api/articles/:article_id/comments', () => {
+    it('POST: 201 responds with a new comment inserted for given article id, and when the request body accepts an object of two properties: body and username', () => {
+        const newComment = {
+            "username": "butter_bridge",
+            "body": "Great read"
+        };
+        return request(app)
+            .post("/api/articles/2/comments")
+            .send(newComment)
+            .expect(201)
+            .then(({ body }) => {
+                const { comment } = body;
+                expect(comment).toBeInstanceOf(Object);
+                expect(comment).toMatchObject({
+                    body: "Great read",
+                    votes: 0,
+                    author: "butter_bridge",
+                    article_id: 2,
+                    comment_id: expect.any(Number),
+                    created_at: expect.any(String)
+                })
+            })
+    });
+    it('POST 201: responds with a new comment inserted for given article id, when the request body accepts an object of two properties: body and username and ignores extra properties that are sent with the comment', () => {
+        const newComment = {
+            "username": "butter_bridge",
+            "body": "Great read",
+            'likes': 100
+
+        };
+        return request(app)
+            .post('/api/articles/2/comments')
+            .send(newComment)
+            .expect(201)
+            .then(({ body }) => {
+                const { comment } = body
+                expect(comment).toMatchObject({
+                    body: "Great read",
+                    votes: 0,
+                    author: "butter_bridge",
+                    article_id: 2,
+                    comment_id: expect.any(Number),
+                    created_at: expect.any(String)
+                })
+            })
+    });
+    it('POST 400: Responds with an error message when inputting an invalid article Id', () => {
+        const newComment = {
+            "username": "butter_bridge",
+            "body": "Great read"
+        };
+        return request(app)
+            .post("/api/articles/notAnId/comments")
+            .send(newComment)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe('Invalid ID')
+            })
+    });
+    it('POST 404: Responds with an error message when article Id is valid but does not exist yet', () => {
+        const newComment = {
+            "username": "butter_bridge",
+            "body": "Great read"
+        };
+        return request(app)
+            .post("/api/articles/9999/comments")
+            .send(newComment)
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe('Article ID not found')
+            })
+    });
+    it('POST 404: Responds with an error message when the article exists but the username is invalid', () => {
+        const newComment = {
+            "username": "Im_not_a_user",
+            "body": "Great read"
+        }
+        return request(app)
+            .post("/api/articles/2/comments")
+            .send(newComment)
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe('Username invalid')
+            })
+    });
+    it('POST 400: Responds with an error message for an article that exists but the comments is empty or does not include body and author name', () => {
+        const newComment = {}
+        return request(app)
+            .post("/api/articles/3/comments")
+            .send(newComment)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe('Comments requires a body and author')
+            })
+    });
+});
+
+describe('PATCH:/api/articles/:article_id ', () => {
+    it('200: should add an extra vote when passed one or multiple votes', () => {
+        const input = { inc_votes: 1 }
+        return request(app)
+            .patch("/api/articles/1")
+            .send(input)
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.article).toEqual({
+                    article_id: 1,
+                    title: 'Living in the shadow of a great man',
+                    topic: 'mitch',
+                    author: 'butter_bridge',
+                    body: 'I find this existence challenging',
+                    created_at: '2020-07-09T20:11:00.000Z',
+                    votes: 101,
+                    article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+                })
+            })
+    });
+    it('200: should subtracts votes when a negative number ', () => {
+        const input = { inc_votes: -100 }
+        return request(app)
+            .patch("/api/articles/1")
+            .send(input)
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.article).toEqual({
+                    article_id: 1,
+                    title: 'Living in the shadow of a great man',
+                    topic: 'mitch',
+                    author: 'butter_bridge',
+                    body: 'I find this existence challenging',
+                    created_at: '2020-07-09T20:11:00.000Z',
+                    votes: 0,
+                    article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+                })
+            })
+    });
+    it('400: Responds with an error message when inputting an invalid article Id ', () => {
+        const input = { inc_votes: 1 }
+        return request(app)
+            .patch("/api/articles/oops")
+            .send(input)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Invalid ID")
+            })
+    });
+    it('404: Responds with an error message when article id does not exist yet', () => {
+        const input = { inc_votes: 1 }
+        return request(app)
+            .patch("/api/articles/8000")
+            .send(input)
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Article not found")
+            })
+    });
+});
