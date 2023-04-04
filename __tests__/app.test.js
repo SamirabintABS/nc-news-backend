@@ -256,7 +256,7 @@ describe('POST /api/articles/:article_id/comments', () => {
     });
 });
 
-describe.only('PATCH:/api/articles/:article_id ', () => {
+describe('PATCH:/api/articles/:article_id ', () => {
     it('200: should add an extra vote when passed one or multiple votes', () => {
         const input = { inc_votes: 1 }
         return request(app)
