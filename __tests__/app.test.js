@@ -255,3 +255,64 @@ describe('POST /api/articles/:article_id/comments', () => {
             })
     });
 });
+
+describe.only('PATCH:/api/articles/:article_id ', () => {
+    it('200: should add an extra vote when passed one or multiple votes', () => {
+        const input = { inc_votes: 1 }
+        return request(app)
+            .patch("/api/articles/1")
+            .send(input)
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.article).toEqual({
+                    article_id: 1,
+                    title: 'Living in the shadow of a great man',
+                    topic: 'mitch',
+                    author: 'butter_bridge',
+                    body: 'I find this existence challenging',
+                    created_at: '2020-07-09T20:11:00.000Z',
+                    votes: 101,
+                    article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+                })
+            })
+    });
+    it('200: should subtracts votes when a negative number ', () => {
+        const input = { inc_votes: -100 }
+        return request(app)
+            .patch("/api/articles/1")
+            .send(input)
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.article).toEqual({
+                    article_id: 1,
+                    title: 'Living in the shadow of a great man',
+                    topic: 'mitch',
+                    author: 'butter_bridge',
+                    body: 'I find this existence challenging',
+                    created_at: '2020-07-09T20:11:00.000Z',
+                    votes: 0,
+                    article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+                })
+            })
+    });
+    it('400: Responds with an error message when inputting an invalid article Id ', () => {
+        const input = { inc_votes: 1 }
+        return request(app)
+            .patch("/api/articles/oops")
+            .send(input)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Invalid ID")
+            })
+    });
+    it('404: Responds with an error message when article id does not exist yet', () => {
+        const input = { inc_votes: 1 }
+        return request(app)
+            .patch("/api/articles/8000")
+            .send(input)
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Article not found")
+            })
+    });
+});

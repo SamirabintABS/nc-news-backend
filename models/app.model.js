@@ -82,3 +82,21 @@ exports.insertComments = (newComment, articleId) => {
             })
         })
 }
+
+exports.insertVotes = (article, voteIncrease) => {
+    const articleVotes = article.votes += voteIncrease
+    const articleId = article.article_id
+    const info = [articleId, articleVotes]
+    return db.query(
+        `UPDATE articles
+        SET votes = $2
+        WHERE article_id = $1
+        RETURNING *;`, info
+    ).then((result) => {
+        if (result.rows.length === 0) {
+            return Promise.reject({ status: 404, msg: "Article ID not found" })
+        } else {
+            return result.rows[0]
+        }
+    })
+}
