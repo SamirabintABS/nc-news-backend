@@ -256,7 +256,7 @@ describe('POST /api/articles/:article_id/comments', () => {
     });
 });
 
-describe.only('PATCH:/api/articles/:article_id ', () => {
+describe('PATCH:/api/articles/:article_id ', () => {
     it('200: should add an extra vote when passed one or multiple votes', () => {
         const input = { inc_votes: 1 }
         return request(app)
@@ -323,6 +323,33 @@ describe.only('PATCH:/api/articles/:article_id ', () => {
             .expect(400)
             .then(({ body }) => {
                 expect(body.msg).toBe("Votes are numbers only!")
+            })
+    });
+});
+
+describe('DELETE /api/comments/:comment_id', () => {
+    it('204: should delete the given comment by comment_id', () => {
+        return request(app)
+            .delete("/api/comments/1")
+            .expect(204)
+            .then(({ body }) => {
+                expect(body).toEqual({})
+            })
+    });
+    it('404: should respond with an error if comment_id is not found', () => {
+        return request(app)
+            .delete("/api/comments/80000")
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Comment not found")
+            })
+    });
+    it('400: should respond with an error if passed an invalid comment id', () => {
+        return request(app)
+            .delete("/api/comments/notAnID")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Invalid ID")
             })
     });
 });
