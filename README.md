@@ -25,6 +25,8 @@ There are two databases available on this project: test and development. If you 
 
 *Note: You will need to add these files each time you clone the repo as they are automatically added to git ignore.*
 
+Use `npm run setup-dbs` to connect to the database and `npm run seed` to seed the database with the relevant data. 
+
 To run tests use `npm run test`.
 
 ## Minimum version requirements
