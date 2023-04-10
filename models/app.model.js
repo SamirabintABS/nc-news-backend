@@ -115,3 +115,14 @@ exports.fetchCommentsByCommentId = (commentId) => {
     })
 }
 
+exports.fetchAllUsers = () => {
+    let selectQueryStr =
+        `SELECT * FROM users`
+
+    return db
+        .query(selectQueryStr)
+        .then((result) => {
+            return result.rows;
+        })
+}
+

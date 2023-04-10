@@ -353,3 +353,32 @@ describe('DELETE /api/comments/:comment_id', () => {
             })
     });
 });
+
+describe('GET /api/users', () => {
+    it('GET 200: respond with an array of objects each having the relevant user properties', () => {
+        return request(app)
+            .get("/api/users")
+            .expect(200)
+            .then(({ body }) => {
+                const { users } = body;
+                expect(users).toHaveLength(4);
+                expect(users).toBeInstanceOf(Array)
+                users.forEach((user) => {
+                    expect(user).toMatchObject({
+                        username: expect.any(String),
+                        name: expect.any(String),
+                        avatar_url: expect.any(String)
+                    })
+                })
+            })
+    });
+    it('GET 404: Responds with an error when given path has a typo', () => {
+        return request(app)
+            .get('/api/uusserrs')
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe('Path not found')
+            })
+    });
+});
+
