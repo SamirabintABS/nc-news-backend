@@ -47,11 +47,16 @@ exports.addComments = (req, res, next) => {
 
 exports.updateVotes = (req, res, next) => {
     const articleId = req.params.article_id
-    const voteIncrease = req.body.inc_votes
+    const { inc_votes } = req.body;
+
+    if (isNaN(inc_votes)) {
+        return next({ status: 400, msg: 'Votes are numbers only!' });
+    }
     fetchArticlesById(articleId).then((result) => {
         if (result) {
-            return insertVotes(result, voteIncrease)
+            return insertVotes(result, inc_votes)
         }
+
     }).then((result) => {
         res.status(200).send({ article: result })
     }).catch((err) => {

@@ -256,7 +256,7 @@ describe('POST /api/articles/:article_id/comments', () => {
     });
 });
 
-describe('PATCH:/api/articles/:article_id ', () => {
+describe.only('PATCH:/api/articles/:article_id ', () => {
     it('200: should add an extra vote when passed one or multiple votes', () => {
         const input = { inc_votes: 1 }
         return request(app)
@@ -313,6 +313,16 @@ describe('PATCH:/api/articles/:article_id ', () => {
             .expect(404)
             .then(({ body }) => {
                 expect(body.msg).toBe("Article not found")
+            })
+    });
+    it('400: respond with an error if a bad vote body is passed, such as a string', () => {
+        const input = { inc_votes: "Samira" }
+        return request(app)
+            .patch("/api/articles/1")
+            .send(input)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Votes are numbers only!")
             })
     });
 });

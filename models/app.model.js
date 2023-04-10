@@ -1,3 +1,4 @@
+const res = require('express/lib/response.js');
 const db = require('../db/connection.js');
 
 exports.fetchTopics = () => {
