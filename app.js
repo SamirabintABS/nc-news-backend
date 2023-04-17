@@ -1,8 +1,12 @@
 const express = require('express');
+const cors = require('cors');
 const { getTopics, getArticlesById, getArticles, getCommentsById, addComments, updateVotes, deleteComments, getAllUsers } = require('./controllers/app.controller');
 const { handlePsqlErrors, handleServerErrors, handleCustomErrors } = require('./errors/index.js')
 
 const app = express();
+
+// uses cors middleware to enable requests to this api from my React app
+app.use(cors());
 
 // allows us to get the req.body for posting and patching
 app.use(express.json());
