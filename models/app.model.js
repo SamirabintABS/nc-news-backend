@@ -1,12 +1,26 @@
 const res = require('express/lib/response.js');
 const db = require('../db/connection.js');
+const articles = require("../db/data/test-data/articles");
 
-exports.fetchTopics = () => {
-    return db.query(`SELECT * FROM topics;`)
-        .then((result) => {
-            return result.rows;
-        })
-}
+
+exports.fetchTopics = (topic) => {
+    let selectTopicQueryStr = `SELECT * FROM topics`;
+    const queryParams = [];
+
+    if (topic) {
+        selectTopicQueryStr += ` WHERE slug = $1`;
+        queryParams.push(topic);
+    }
+
+    return db.query(selectTopicQueryStr, queryParams).then((result) => {
+        if (result.rows.length > 0) {
+            const topics = result.rows;
+            return topics;
+        } else {
+            return Promise.reject({ status: 404, msg: "Invalid request" });
+        }
+    });
+};
 
 exports.fetchArticlesById = (articleId) => {
     return db.query(`SELECT * FROM articles WHERE article_id = $1`, [articleId])
@@ -18,33 +32,52 @@ exports.fetchArticlesById = (articleId) => {
         })
 }
 
-exports.fetchAllArticles = () => {
-
-    let selectQueryStr =
-        `SELECT articles.title,
-        articles.author,
-        articles.article_id,
-        articles.topic,
-        articles.created_at,
-        articles.votes,
-        articles.article_img_url, 
-        COUNT(comments.comment_id)::INT AS comment_count
-        FROM articles
-        LEFT JOIN comments
-        ON articles.article_id = comments.article_id 
-        GROUP BY articles.article_id `
-
-    const sortBy = 'ORDER BY articles.created_at DESC'
-
-    if (sortBy) {
-        selectQueryStr += `${sortBy}`
+exports.fetchArticles = (sort_by, order, topic) => {
+    if (
+        sort_by &&
+        sort_by !== "article_id" &&
+        sort_by !== "title" &&
+        sort_by !== "author" &&
+        sort_by !== "comment_count" &&
+        sort_by !== "topic" &&
+        sort_by !== "created_at" &&
+        sort_by !== "article_img_url" &&
+        sort_by !== "votes" &&
+        sort_by !== "body"
+    ) {
+        return Promise.reject({ status: 400, msg: "Invalid Sort Query" });
     }
-    return db
-        .query(selectQueryStr)
-        .then((result) => {
-            return result.rows;
-        })
-}
+    if (
+        order &&
+        order !== "desc" &&
+        order !== "asc" &&
+        order !== "DESC" &&
+        order !== "ASC"
+    ) {
+        return Promise.reject({ status: 400, msg: "Invalid Order Query" });
+    }
+
+    const queryParams = [];
+    let articlesQueryStr = `SELECT articles.article_id, articles.title, articles.author, articles.topic, articles.created_at, articles.votes, articles.article_img_url, CAST(COUNT(comments.article_id)AS INT) AS comment_count
+  FROM comments
+  RIGHT JOIN articles
+  ON articles.article_id = comments.article_id`;
+
+    if (topic) {
+        articlesQueryStr += ` WHERE topic = '${topic}'`;
+    }
+
+    articlesQueryStr += ` GROUP BY articles.article_id, articles.author, articles.title, articles.topic, articles.created_at, articles.votes, articles.article_img_url`;
+
+    if (sort_by) {
+        articlesQueryStr += ` ORDER BY ${sort_by} ${order || "DESC"}`;
+    } else {
+        articlesQueryStr += ` ORDER BY created_at ${order || "DESC"}`;
+    }
+    return db.query(articlesQueryStr, queryParams).then((result) => {
+        return result.rows;
+    });
+};
 
 exports.fetchCommentsById = (articleId) => {
     const articlesQuery = `SELECT * FROM articles WHERE article_id = $1`;

@@ -1,4 +1,4 @@
-const { fetchTopics, fetchArticlesById, fetchAllArticles, fetchCommentsById, insertComments, insertVotes, fetchCommentsByCommentId, fetchAllUsers } = require("../models/app.model")
+const { fetchTopics, fetchArticlesById, fetchArticles, fetchCommentsById, insertComments, insertVotes, fetchCommentsByCommentId, fetchAllUsers } = require("../models/app.model")
 
 exports.getTopics = (req, res, next) => {
     fetchTopics()
@@ -19,13 +19,23 @@ exports.getArticlesById = (req, res, next) => {
         })
 }
 
-exports.getAllArticles = (req, res, next) => {
-    fetchAllArticles()
-        .then((articles) => {
-            res.status(200).send(articles)
+exports.getArticles = (req, res, next) => {
+    const { sort_by, order, topic } = req.query;
+
+    fetchTopics(topic)
+        .then((result) => {
+            if (result.length === 0) {
+                return Promise.reject({ status: 404, msg: "Invalid topic" });
+            }
+            return fetchArticles(sort_by, order, topic);
         })
-        .catch(next)
-}
+        .then((articles, result) => {
+            res.status(200).send({ articles });
+        })
+        .catch((err) => {
+            next(err);
+        });
+};
 
 exports.getCommentsById = (req, res, next) => {
     const articleId = req.params;

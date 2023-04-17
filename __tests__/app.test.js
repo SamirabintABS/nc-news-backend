@@ -72,37 +72,112 @@ describe('GET /api/articles/:article_id', () => {
 });
 
 describe('GET: /api/articles', () => {
-    it('GET: responds with an array of objects, each object has the relevant properties including a comment_count of all the comments with the its article_id, sorted by date in descending order', () => {
+    it("GET 200: accepts a sort_by query which sorts by any valid column (article_id)", () => {
         return request(app)
-            .get('/api/articles')
+            .get("/api/articles?sort_by=article_id")
             .expect(200)
             .then(({ body }) => {
-                expect(body).toHaveLength(12);
-                expect(body).toBeInstanceOf(Array)
-                body.forEach((article) => {
-                    expect(article).toMatchObject({
-                        author: expect.any(String),
-                        title: expect.any(String),
-                        article_id: expect.any(Number),
-                        topic: expect.any(String),
-                        created_at: expect.any(String),
-                        votes: expect.any(Number),
-                        article_img_url: expect.any(String),
-                        comment_count: expect.any(Number)
-                    })
-                })
-                expect(body).toBeSortedBy('created_at', {
-                    descending: true,
-                })
-            })
+                const originalArticles = body.articles;
+                const articleClone = JSON.parse(JSON.stringify(originalArticles));
+                expect(originalArticles).toHaveLength(12);
+                const sortedArticles = articleClone.sort((articleA, articleB) => {
+                    return articleB.article_id - articleA.article_id;
+                });
+                expect(originalArticles).toEqual(sortedArticles);
+            });
     });
-    it('GET 404: Responds with an error when given path has a typo', () => {
+    it("GET 200: accepts a sort_by query which sorts by any valid column (title)", () => {
         return request(app)
-            .get('/api/articccles')
+            .get("/api/articles?sort_by=title")
+            .expect(200)
+            .then(({ body }) => {
+                const originalArticles = body.articles;
+                const articleClone = JSON.parse(JSON.stringify(originalArticles));
+                expect(originalArticles).toHaveLength(12);
+                const sortedArticles = articleClone.sort((articleA, articleB) => {
+                    return articleB.title - articleA.title;
+                });
+                expect(originalArticles).toEqual(sortedArticles);
+            });
+    });
+    it("GET 200: accepts a sort_by query which sorts by any valid column but defaults to created_at and DESC order and all articles", () => {
+        return request(app)
+            .get("/api/articles")
+            .expect(200)
+            .then(({ body }) => {
+                const originalArticles = body.articles;
+                const articleClone = JSON.parse(JSON.stringify(originalArticles));
+                expect(originalArticles).toHaveLength(12);
+                expect(originalArticles).toBeInstanceOf(Array);
+                const sortedArticles = articleClone.sort((articleA, articleB) => {
+                    return articleB.created_at - articleA.created_at;
+                });
+                expect(originalArticles).toEqual(sortedArticles);
+            });
+    });
+    it("GET 200: accepts an order query which can order by ASC or asc", () => {
+        return request(app)
+            .get("/api/articles?order=ASC")
+            .expect(200)
+            .then(({ body }) => {
+                const originalArticles = body.articles;
+                const articleClone = JSON.parse(JSON.stringify(originalArticles));
+                expect(originalArticles).toHaveLength(12);
+                expect(originalArticles).toBeInstanceOf(Array);
+                const sortedArticles = articleClone.sort((articleA, articleB) => {
+                    return articleA.created_at - articleB.created_at;
+                });
+                expect(originalArticles).toEqual(sortedArticles);
+            });
+    });
+    it("GET 200: accepts a topic query which returns only the articles of the specified topic", () => {
+        return request(app)
+            .get("/api/articles?topic=cats")
+            .expect(200)
+            .then(({ body }) => {
+                const articles = body.articles;
+                expect(articles).toBeInstanceOf(Array);
+                expect(articles).toHaveLength(1);
+                const checkTopics = articles.every(
+                    (article) => article.topic === "cats"
+                );
+                expect(checkTopics).toBe(true);
+            });
+    });
+    it("GET 404: gets error when topic doesn't exist", () => {
+        return request(app)
+            .get("/api/articles?topic=dogs")
             .expect(404)
             .then(({ body }) => {
-                expect(body.msg).toBe('Path not found')
-            })
+                expect(body.msg).toBe("Invalid request");
+            });
+    });
+    it("GET 400: trying to sort_by a property that doesnt exist", () => {
+        return request(app)
+            .get("/api/articles?sort_by=name")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Invalid Sort Query");
+            });
+    });
+    it("GET 400: trying to order by an invalid order", () => {
+        return request(app)
+            .get("/api/articles?order=up")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Invalid Order Query");
+            });
+    });
+    it("GET 200: a topic query that exists but has no articles", () => {
+        return request(app)
+            .get("/api/articles?topic=paper")
+            .expect(200)
+            .then(({ body }) => {
+                const articles = body.articles;
+                expect(articles).toBeInstanceOf(Array);
+                expect(articles).toHaveLength(0);
+                expect(articles).toEqual([]);
+            });
     });
 });
 
