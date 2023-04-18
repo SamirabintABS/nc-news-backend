@@ -58,7 +58,7 @@ exports.fetchArticles = (sort_by, order, topic) => {
     }
 
     const queryParams = [];
-    let articlesQueryStr = `SELECT articles.article_id, articles.title, articles.author, articles.topic, articles.created_at, articles.votes, articles.article_img_url, CAST(COUNT(comments.article_id)AS INT) AS comment_count
+    let articlesQueryStr = `SELECT articles.article_id, articles.title, articles.author, articles.body, articles.topic, articles.created_at, articles.votes, articles.article_img_url, CAST(COUNT(comments.article_id)AS INT) AS comment_count
   FROM comments
   RIGHT JOIN articles
   ON articles.article_id = comments.article_id`;
