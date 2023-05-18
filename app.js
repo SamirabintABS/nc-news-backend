@@ -12,26 +12,6 @@ app.use(cors());
 // allows us to get the req.body for posting and patching
 app.use(express.json());
 
-app.get("/api/topics", getTopics);
-
-app.get("/api/articles/:article_id", getArticlesById);
-
-app.get("/api/articles", getArticles);
-
-app.get("/api/articles/:article_id/comments", getCommentsById);
-
-app.post("/api/articles/:article_id/comments", addComments);
-
-app.patch("/api/articles/:article_id", updateVotes)
-
-app.delete("/api/comments/:comment_id", deleteComments)
-
-app.get("/api/users", getAllUsers)
-
-app.all("*", (req, res, next) => {
-    res.status(404).send({ msg: 'Path not found' })
-})
-
 // Define a route for generating endpoints.json
 app.get('/generate-endpoints', (req, res) => {
   const routes = app._router.stack // Get all registered routes
@@ -54,6 +34,26 @@ app.get('/generate-endpoints', (req, res) => {
     }
   });
 });
+
+app.get("/api/topics", getTopics);
+
+app.get("/api/articles/:article_id", getArticlesById);
+
+app.get("/api/articles", getArticles);
+
+app.get("/api/articles/:article_id/comments", getCommentsById);
+
+app.post("/api/articles/:article_id/comments", addComments);
+
+app.patch("/api/articles/:article_id", updateVotes)
+
+app.delete("/api/comments/:comment_id", deleteComments)
+
+app.get("/api/users", getAllUsers)
+
+app.all("*", (req, res, next) => {
+    res.status(404).send({ msg: 'Path not found' })
+})
 
 app.use(handlePsqlErrors);
 app.use(handleCustomErrors);
