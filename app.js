@@ -51,7 +51,7 @@ app.get('/preview-endpoints', (req, res) => {
           console.error(err);
           res.status(500).send('Error reading endpoints.json');
         } else {
-          res.send(data);
+          res.send(JSON.parse(data));
         }
       });
     }
