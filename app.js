@@ -12,25 +12,48 @@ app.use(cors());
 // allows us to get the req.body for posting and patching
 app.use(express.json());
 
-// Define a route for generating endpoints.json
-app.get('/generate-endpoints', (req, res) => {
-  const routes = app._router.stack // Get all registered routes
-    .filter((r) => r.route) // Filter out middleware
-    .map((r) => {
-      return {
-        path: r.route.path,
-        methods: Object.keys(r.route.methods),
-      };
-    });
-
-  const endpoints = { endpoints: routes };
+app.get('/preview-endpoints', (req, res) => {
+   const endpoints = {
+    "GET /api": {
+      description: "serves up a json representation of all the available endpoints of the api"
+    },
+    "GET /api/topics": {
+      description: "serves an array of all topics",
+      queries: [],
+      exampleResponse: {
+        topics: [{ slug: "football", description: "Footie!" }]
+      }
+    },
+    "GET /api/articles": {
+      description: "serves an array of all articles",
+      queries: ["author", "topic", "sort_by", "order"],
+      exampleResponse: {
+        articles: [
+          {
+            title: "Seafood substitutions are increasing",
+            topic: "cooking",
+            author: "weegembump",
+            body: "Text from the article..",
+            created_at: 1527695953341
+          }
+        ]
+      }
+    }
+  };
 
   fs.writeFile('endpoints.json', JSON.stringify(endpoints, null, 2), (err) => {
     if (err) {
       console.error(err);
       res.status(500).send('Error generating endpoints.json');
     } else {
-      res.send('endpoints.json generated successfully!');
+      fs.readFile('endpoints.json', 'utf8', (err, data) => {
+        if (err) {
+          console.error(err);
+          res.status(500).send('Error reading endpoints.json');
+        } else {
+          res.send(data);
+        }
+      });
     }
   });
 });
