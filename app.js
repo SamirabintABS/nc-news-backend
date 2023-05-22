@@ -14,9 +14,6 @@ app.use(express.json());
 
 app.get('/preview-endpoints', (req, res) => {
     const endpoints = {
-        "GET /api": {
-            description: "serves up a json representation of all the available endpoints of the api"
-        },
         "GET /api/topics": {
             description: "serves an array of all topics",
             queries: [],
